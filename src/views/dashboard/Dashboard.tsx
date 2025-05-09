@@ -10,6 +10,11 @@ import {
   TableRow,
   Typography,
   useTheme,
+  CircularProgress,
+  TextField,
+  Card,
+  CardContent,
+  Alert,
 } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import SearchBar from "../../components/text/SearchText";
@@ -20,6 +25,7 @@ import Text2 from "../../components/text/Text2";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Dashboard = () => {
   const [isPublished, setIsPublished] = useState(false);
@@ -32,6 +38,11 @@ const Dashboard = () => {
 
   const [search, setSearch] = useState(searchText);
 
+  const [addrInput, setAddrInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [meta, setMeta] = useState<any>(null);
+
   const handleSearchChange = (str: string) => {
     setSearch(str);
   };
@@ -42,6 +53,24 @@ const Dashboard = () => {
 
   const handleDetail = () => {
     navigate("/sell");
+  };
+
+  const lookup = async () => {
+    setErrorMsg("");
+    setMeta(null);
+    setLoading(true);
+    try {
+      const { data } = await axios.get("/api/technical_assessment", {
+        params: { address: addrInput },
+      });
+      setMeta(data);
+    } catch (err: any) {
+      setErrorMsg(
+        err.response?.data?.error || err.message || "Request failed"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const label = { inputProps: { "aria-label": "Checkbox demo" } };
@@ -94,6 +123,60 @@ const Dashboard = () => {
               Show only whitelisted properties's offers
             </Typography>
           </Box>
+
+          <Box sx={{ mt: 4, mb: 2 }}>
+            <TextField
+              label="Contract address"
+              value={addrInput}
+              onChange={(e) => setAddrInput(e.target.value)}
+              size="small"
+              sx={{ mr: 2, width: "420px", backgroundColor: "#fff" }}
+            />
+            <Button
+              variant="contained"
+              onClick={lookup}
+              disabled={loading || !addrInput}
+            >
+              {loading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Lookup"
+              )}
+            </Button>
+          </Box>
+          {errorMsg && (
+            <Alert severity="error" sx={{ mb: 2, maxWidth: 600 }}>
+              {errorMsg}
+            </Alert>
+          )}
+          {meta && (
+            <Card sx={{ mb: 4, maxWidth: 600 }}>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Smart-Contract Metadata
+                </Typography>
+                <Typography>
+                  <strong>Contract:</strong> {meta.contractAddress}
+                </Typography>
+                <Typography>
+                  <strong>Creator:</strong> {meta.creatorAddress}
+                </Typography>
+                <Typography>
+                  <strong>Tx Hash:</strong> {meta.creationTxHash}
+                </Typography>
+                <Typography>
+                  <strong>Deployed:</strong>{" "}
+                  {new Date(
+                    meta.deploymentTimestamp * 1000
+                  ).toLocaleString()}
+                </Typography>
+                <Typography>
+                  <strong>Network:</strong> {meta.networkName} (chain{" "}
+                  {meta.chainId})
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
         </Box>
       </Box>
       <Box
@@ -220,140 +303,6 @@ const Dashboard = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              <TableRow
-                hover
-                sx={{
-                  cursor: "pointer",
-                  "& td": {
-                    padding: "0px 5px",
-                    borderRight: "2px solid #00dbe3",
-                  },
-                  "& td:last-child": { borderRight: "0px" },
-                }}
-              >
-                <TableCell align="center">
-                  <Text2>371</Text2>
-                </TableCell>
-                <TableCell>
-                  <Text2>Token 1</Text2>
-                </TableCell>
-                <TableCell>
-                  <Text2>USDC</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>10%</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>12%</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>20%</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>$51.35</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>$60.00</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>$16.85%</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>12.28838</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton
-                    aria-label="delete"
-                    onClick={(event: any) => {
-                      event.stopPropagation();
-                    }}
-                  >
-                    <ShoppingCartOutlinedIcon
-                      sx={{ fontSize: "24px", color: "#00dbe3" }}
-                    />
-                  </IconButton>
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton
-                    aria-label="delete"
-                    onClick={(event: any) => {
-                      event.stopPropagation();
-                      handleDetail();
-                    }}
-                  >
-                    <RemoveRedEyeOutlinedIcon
-                      sx={{ fontSize: "24px", color: "#00dbe3" }}
-                    />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-              <TableRow
-                hover
-                sx={{
-                  cursor: "pointer",
-                  "& td": {
-                    padding: "0px 5px",
-                    borderRight: "2px solid #00dbe3",
-                  },
-                  "& td:last-child": { borderRight: "0px" },
-                }}
-              >
-                <TableCell align="center">
-                  <Text2>371</Text2>
-                </TableCell>
-                <TableCell>
-                  <Text2>Token 1</Text2>
-                </TableCell>
-                <TableCell>
-                  <Text2>USDC</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>10%</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>12%</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>20%</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>$51.35</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>$60.00</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>$16.85%</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <Text2>12.28838</Text2>
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton
-                    aria-label="delete"
-                    onClick={(event: any) => {
-                      event.stopPropagation();
-                    }}
-                  >
-                    <ShoppingCartOutlinedIcon
-                      sx={{ fontSize: "24px", color: "#00dbe3" }}
-                    />
-                  </IconButton>
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton
-                    aria-label="delete"
-                    onClick={(event: any) => {
-                      event.stopPropagation();
-                      handleDetail();
-                    }}
-                  >
-                    <RemoveRedEyeOutlinedIcon
-                      sx={{ fontSize: "24px", color: "#00dbe3" }}
-                    />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
             </TableBody>
           </Table>
         </Box>
