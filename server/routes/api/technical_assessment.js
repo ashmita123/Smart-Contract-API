@@ -1,16 +1,14 @@
 const express = require('express');
 const axios   = require('axios');
+const {getAddress} = require ('ethers');
 
 const router = express.Router();
 const { ETHERSCAN_API_KEY } = process.env;
 
 router.get('/', async (req, res) => {
   try {
-    const address = (req.query.address || '').trim().toLowerCase();
-
-    if (!/^0x[0-9a-fA-F]{40}$/.test(address))
-      return res.status(400).json({ error: 'Invalid or missing contract address' });
-
+    const address = getAddress((req.query.address || '').trim().toLowerCase());
+    
     const url =
       `https://api.etherscan.io/api?module=account&action=txlist`+
       `&address=${address}&startblock=0&endblock=99999999&page=1&offset=1&sort=asc`+
